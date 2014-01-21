@@ -54,5 +54,16 @@ public:
     {
         return get("/1.1/statuses/retweets_of_me.json");
     }
+	
+	// Returns the 20 most recent mentions (tweets containing a users's @screen_name) for the authenticating user
+	// The timeline returned is the equivalent of the one seen when you view your mentions on twitter.com.
+	// This method can only return up to 800 tweets.
+	// https://dev.twitter.com/docs/api/1.1/get/statuses/mentions_timeline
+	std::string getMentions(){
+		
+		return get("/1.1/statuses/mentions_timeline.json");
+	}
+	
+	
 
 };

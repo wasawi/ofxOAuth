@@ -35,7 +35,8 @@ void ofApp::setup()
     // A simplified interface when using the ofxExampleTwitterClient class.
     // Twitter-specific configuration details can be taken care of the 
     // ofxOAuth base class.
-    client.setup("CONSUMER_KEY","CONSUMER_SECRET");
+//    client.setup("CONSUMER_KEY","CONSUMER_SECRET");
+    client.setup("pHA27PLNeoFD1R3093jEQ","78025mOujCNB3aAk04TwCd6hRFvtB1gPO42DEWYYs");
     
     // Once authenticated, press the spacebar to try a test call.
 }
@@ -60,7 +61,8 @@ void ofApp::keyPressed(int key)
      {
         if(client.isAuthorized())
         {
-            std::string s = client.exampleMethod();
+			//std::string s = client.exampleMethod();
+			std::string s = client.getMentions();
             ofLogNotice("testApp::keyPressed") << s;
         }
         else
