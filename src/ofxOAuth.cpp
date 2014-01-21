@@ -323,7 +323,6 @@ std::string ofxOAuth::post(const std::string& uri, const std::string& query)
 	httpMethod = OFX_HTTP_POST;
 	
     string result = "";
-    // TODO: fix this method
     
 	if(apiURL.empty())
     {
@@ -355,18 +354,14 @@ std::string ofxOAuth::post(const std::string& uri, const std::string& query)
         return result;
     }
 	std::string req_url;
-	std::string req_pargs;
     std::string req_hdr;
     std::string http_hdr;
     
     std::string reply;
     
     // oauth_sign_url2 (see oauth.h) in steps
-    int  argc   = 0;
+    int  argc   = NULL;
     char **argv = NULL;
-	char *postargs = NULL;
-//	std::string postargs_string = "status= Hello World";	// Here i need my query
-//	char *postargs[] = {"s", "t", "a", "t", "u", "s", "=", "H", "e","\0"};
 	
     // break apart the url parameters so they can be signed below
     // if desired we can also pass in additional patermeters (like oath* params)
@@ -375,13 +370,12 @@ std::string ofxOAuth::post(const std::string& uri, const std::string& query)
     
     std::string url = apiURL + uri + "?" + query;
     
-//    argc = oauth_split_url_parameters(url.c_str(), &argv);
-	argc = oauth_split_post_paramters(url.c_str(), &argv, 0);
+    argc = oauth_split_url_parameters(url.c_str(), &argv);
 
 	// sign the array.
 	oauth_sign_array2_process(&argc,						// argcp pointer to array length int
                               &argv,						// argvp pointer to array values
-                              &postargs,					//< postargs This parameter points to an area where the return value is stored.
+							  NULL,							//< postargs This parameter points to an area where the return value is stored.
 															// If 'postargs' is NULL, no value is stored.
                               _getOAuthMethod(),			// hash type, OA_HMAC, OA_RSA, OA_PLAINTEXT
                               _getHttpMethod().c_str(),		//< HTTP method (defaults to "GET")
@@ -402,29 +396,9 @@ std::string ofxOAuth::post(const std::string& uri, const std::string& query)
 	
     // collect any parameters in our list that need to be placed in the request URI
     req_url = oauth_serialize_url_sep(argc, 0, argv, const_cast<char *>("&"), 1);
-    
-	///////////////////////////////////////////////////
-	/**
-	 * build a query parameter string from an array.
-	 *
-	 * This function is a shortcut for \ref oauth_serialize_url (argc, 1, argv).
-	 * It strips the leading host/path, which is usually the first
-	 * element when using oauth_split_url_parameters on an URL.
-	 *
-	 * @param argc the total number of elements in the array
-	 * @param argv parameter-array to concatenate.
-	 * @return url string needs to be freed by the caller.
-	 *		char *oauth_serialize_url_parameters (int argc, char **argv);
-	 */
-//	req_pargs = oauth_serialize_url_parameters(argc, argv);
-//	req_pargs = oauth_serialize_url_sep(argc, 7, argv, const_cast<char *>("&"), 1);
-	req_pargs = "status= Hello World. #BrainNetViz";
-	///////////////////////////////////////////////////
-//	req_url = url;
-//	req_pargs = query;
-	
+
     // collect any of the oauth parameters for inclusion in the HTTP Authorization header.
-    req_hdr = oauth_serialize_url_sep(argc, 1, argv, const_cast<char *>(", "), 6); // const_cast<char *>() is to avoid Deprecated
+    req_hdr = oauth_serialize_url_sep(argc, 1, argv, const_cast<char *>(", "), 2); // const_cast<char *>() is to avoid Deprecated
     
     // look at url parameters to be signed if you want.
     if(ofGetLogLevel() <= OF_LOG_VERBOSE)
@@ -447,12 +421,11 @@ std::string ofxOAuth::post(const std::string& uri, const std::string& query)
     }
 	
     ofLogVerbose("ofxOAuth::post") << "request URL    >" << req_url << "<";
-	ofLogVerbose("ofxOAuth::post") << "request Params >" << req_pargs << "<";
     ofLogVerbose("ofxOAuth::post") << "request HEADER >" << req_hdr << "<";
     ofLogVerbose("ofxOAuth::post") << "http    HEADER >" << http_hdr << "<";
 	
     reply = oauth_http_post2(req_url.c_str(),   // the base url to query
-							 req_pargs.c_str(),	// p postargs to send along with the HTTP request.
+							 "",				// the query string to send
 							 http_hdr.c_str());	// Authorization header is included here
     
     if (reply.empty())
